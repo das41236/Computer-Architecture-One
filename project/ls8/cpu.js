@@ -5,6 +5,12 @@
 /**
  * Class for simulating a simple Computer (CPU & memory)
  */
+
+const LDI = 0b10011001;
+const PRN = 0b01000011;
+const HLT = 0b00000001;
+const MUL = 0b10101010;
+
 class CPU {
 
     /**
@@ -55,7 +61,8 @@ class CPU {
     alu(op, regA, regB) {
         switch (op) {
             case 'MUL':
-                // !!! IMPLEMENT ME
+                this.reg[regA] = this.reg[regA] * this.reg[regB];
+                // console.log('regA log:', regA);
                 break;
         }
     }
@@ -72,8 +79,8 @@ class CPU {
         let IR = this.ram.read(this.reg.PC)
 
         // Debugging output
-        console.log(`${this.reg.PC}: ${IR.toString(2)}`);
-        console.log(typeof IR, IR);
+        // console.log(`${this.reg.PC}: ${IR.toString(2)}`);
+        // console.log(typeof IR, IR);
 
         // Get the two bytes in memory _after_ the PC in case the instruction
         // needs them.
@@ -83,18 +90,23 @@ class CPU {
 
         // Execute the instruction. Perform the actions for the instruction as
         // outlined in the LS-8 spec.
+        // console.log(this.reg[0]);
 
         switch (IR) {
-            case 153:
+            case LDI:
                 this.reg[operandA] = operandB;
                 this.reg.PC = this.reg.PC + 3;
                 break;
-            case 67:
+            case PRN:
                 console.log(this.reg[operandA]);
                 this.reg.PC = this.reg.PC + 2;
                 break;
-            case 1:
+            case HLT:
                 this.stopClock();
+                break;
+            case MUL:
+                this.alu('MUL', operandA, operandB);
+                this.reg.PC = this.reg.PC + 3;
                 break;
             default:
                 console.log('none of those cases, so we stopped anyways')
@@ -121,8 +133,12 @@ class CPU {
         // LDI(operandA, operandB);
         // this.reg.PC = this.reg.PC + 3;
 
+        // const inc = parseInt(IR.toString(2).slice(0,2), 2) + 1;
+        // console.log('increment: ', inc);
+        // console.log('IR.toString: ', IR.toString(2));
 
-        // this.reg.PC = 
+
+        // this.reg.PC += inc;
     }
 }
 
