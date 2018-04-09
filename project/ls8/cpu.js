@@ -73,6 +73,7 @@ class CPU {
 
         // Debugging output
         console.log(`${this.reg.PC}: ${IR.toString(2)}`);
+        console.log(typeof IR, IR);
 
         // Get the two bytes in memory _after_ the PC in case the instruction
         // needs them.
@@ -83,20 +84,45 @@ class CPU {
         // Execute the instruction. Perform the actions for the instruction as
         // outlined in the LS-8 spec.
 
-        const LDI = (operandA, operandB) => {
-            this.reg[operandA] = operandB;
+        switch (IR) {
+            case 153:
+                this.reg[operandA] = operandB;
+                this.reg.PC = this.reg.PC + 3;
+                break;
+            case 67:
+                console.log(this.reg[operandA]);
+                this.reg.PC = this.reg.PC + 2;
+                break;
+            case 1:
+                this.stopClock();
+                break;
+            default:
+                console.log('none of those cases, so we stopped anyways')
+                this.stopClock();
         }
 
-        const PRN = (operandA) => {
-            console.log(this.reg[operandA]);
-        }
+        // const LDI = (operandA, operandB) => {
+        //     this.reg[operandA] = operandB;
+        // }
+
+        // const PRN = (operandA) => {
+        //     console.log(this.reg[operandA]);
+        // }
+
+        // const HLT = () => {
+        //     this.stopClock();
+        // }
 
         // Increment the PC register to go to the next instruction. Instructions
         // can be 1, 2, or 3 bytes long. Hint: the high 2 bits of the
         // instruction byte tells you how many bytes follow the instruction byte
         // for any particular instruction.
         
-        // !!! IMPLEMENT ME
+        // LDI(operandA, operandB);
+        // this.reg.PC = this.reg.PC + 3;
+
+
+        // this.reg.PC = 
     }
 }
 
