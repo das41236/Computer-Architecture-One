@@ -95,18 +95,18 @@ class CPU {
         switch (IR) {
             case LDI:
                 this.reg[operandA] = operandB;
-                this.reg.PC = this.reg.PC + 3;
+                // this.reg.PC = this.reg.PC + 3;
                 break;
             case PRN:
                 console.log(this.reg[operandA]);
-                this.reg.PC = this.reg.PC + 2;
+                // this.reg.PC = this.reg.PC + 2;
                 break;
             case HLT:
                 this.stopClock();
                 break;
             case MUL:
                 this.alu('MUL', operandA, operandB);
-                this.reg.PC = this.reg.PC + 3;
+                // this.reg.PC = this.reg.PC + 3;
                 break;
             default:
                 console.log('none of those cases, so we stopped anyways')
@@ -133,12 +133,12 @@ class CPU {
         // LDI(operandA, operandB);
         // this.reg.PC = this.reg.PC + 3;
 
-        // const inc = parseInt(IR.toString(2).slice(0,2), 2) + 1;
+        const inc = (IR >>> 6) + 1;
         // console.log('increment: ', inc);
         // console.log('IR.toString: ', IR.toString(2));
 
 
-        // this.reg.PC += inc;
+        this.reg.PC += inc;
     }
 }
 
