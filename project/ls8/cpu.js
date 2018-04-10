@@ -11,6 +11,8 @@ const PRN = 0b01000011;
 const HLT = 0b00000001;
 const MUL = 0b10101010;
 
+
+
 class CPU {
 
     /**
@@ -76,7 +78,7 @@ class CPU {
         // index into memory of the instruction that's about to be executed
         // right now.)
         
-        let IR = this.ram.read(this.reg.PC)
+        let IR = this.ram.read(this.reg.PC);
 
         // Debugging output
         // console.log(`${this.reg.PC}: ${IR.toString(2)}`);
@@ -92,54 +94,66 @@ class CPU {
         // outlined in the LS-8 spec.
         // console.log(this.reg[0]);
 
-        switch (IR) {
-            case LDI:
-                this.reg[operandA] = operandB;
-                // this.reg.PC = this.reg.PC + 3;
-                break;
-            case PRN:
-                console.log(this.reg[operandA]);
-                // this.reg.PC = this.reg.PC + 2;
-                break;
-            case HLT:
-                this.stopClock();
-                break;
-            case MUL:
-                this.alu('MUL', operandA, operandB);
-                // this.reg.PC = this.reg.PC + 3;
-                break;
-            default:
-                console.log('none of those cases, so we stopped anyways')
-                this.stopClock();
+        // switch (IR) {
+        //     case LDI:
+        //         this.reg[operandA] = operandB;
+        //         // this.reg.PC = this.reg.PC + 3;
+        //         break;
+        //     case PRN:
+        //         console.log(this.reg[operandA]);
+        //         // this.reg.PC = this.reg.PC + 2;
+        //         break;
+        //     case HLT:
+        //         this.stopClock();
+        //         break;
+        //     case MUL:
+        //         this.alu('MUL', operandA, operandB);
+        //         // this.reg.PC = this.reg.PC + 3;
+        //         break;
+        //     default:
+        //         console.log('none of those cases, so we stopped anyways')
+        //         this.stopClock();
+        // }
+        
+        const handle_LDI = (operandA, operandB) => {
+            this.reg[operandA] = operandB;
+        }
+    
+        const handle_PRN = (operandA) => {
+            console.log(this.reg[operandA]);
+        }
+    
+        const handle_HLT = () => {
+            this.stopClock();
+        }
+    
+        const handle_MUL = (operandA, operandB) => {
+            this.alu('MUL', operandA, operandB);
+        }
+        
+        const branchTable = {
+            [LDI] : handle_LDI,
+            [HLT] : handle_HLT,
+            [PRN] : handle_PRN,
+            [MUL] : handle_MUL
+
         }
 
-        // const LDI = (operandA, operandB) => {
-        //     this.reg[operandA] = operandB;
-        // }
-
-        // const PRN = (operandA) => {
-        //     console.log(this.reg[operandA]);
-        // }
-
-        // const HLT = () => {
-        //     this.stopClock();
-        // }
+        branchTable[IR](operandA, operandB);
 
         // Increment the PC register to go to the next instruction. Instructions
         // can be 1, 2, or 3 bytes long. Hint: the high 2 bits of the
         // instruction byte tells you how many bytes follow the instruction byte
         // for any particular instruction.
-        
-        // LDI(operandA, operandB);
-        // this.reg.PC = this.reg.PC + 3;
 
         const inc = (IR >>> 6) + 1;
+
         // console.log('increment: ', inc);
         // console.log('IR.toString: ', IR.toString(2));
 
-
         this.reg.PC += inc;
     }
+
 }
 
 module.exports = CPU;
