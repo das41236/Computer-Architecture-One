@@ -27,10 +27,27 @@ class CPU {
 
         this.reg = new Array(8).fill(0); // General-purpose registers R0-R7
 
-        this.reg[SP] = 0xf4;
         
         // Special-purpose registers
         this.reg.PC = 0; // Program Counter
+        this.reg[SP] = 0xf4;
+        this.setupBranchTable();
+    }
+
+    setupBranchTable() {
+        let bt = {}
+
+        bt[LDI] = this.handle_LDI;
+        bt[HLT] = this.handle_HLT;
+        bt[PRN] = this.handle_PRN;
+        bt[MUL] = this.handle_MUL;
+        bt[ADD] = this.handle_ADD;
+        bt[PUSH] = this.handle_PUSH;
+        bt[POP] = this.handle_POP;
+        bt[CALL] = this.handle_CALL;
+        bt[RET] = this.handle_RET;
+
+        this.branchTable = bt;
     }
 	
     /**
@@ -101,86 +118,8 @@ class CPU {
 
         // Execute the instruction. Perform the actions for the instruction as
         // outlined in the LS-8 spec.
-        // console.log(this.reg[0]);
 
-        // switch (IR) {
-        //     case LDI:
-        //         this.reg[operandA] = operandB;
-        //         // this.reg.PC = this.reg.PC + 3;
-        //         break;
-        //     case PRN:
-        //         console.log(this.reg[operandA]);
-        //         // this.reg.PC = this.reg.PC + 2;
-        //         break;
-        //     case HLT:
-        //         this.stopClock();
-        //         break;
-        //     case MUL:
-        //         this.alu('MUL', operandA, operandB);
-        //         // this.reg.PC = this.reg.PC + 3;
-        //         break;
-        //     default:
-        //         console.log('none of those cases, so we stopped anyways')
-        //         this.stopClock();
-        // }
-        
-        const handle_LDI = (operandA, operandB) => {
-            this.reg[operandA] = operandB;
-        }
-    
-        const handle_PRN = (operandA) => {
-            console.log(this.reg[operandA]);
-        }
-    
-        const handle_HLT = () => {
-            this.stopClock();
-        }
-    
-        const handle_MUL = (operandA, operandB) => {
-            this.alu('MUL', operandA, operandB);
-        }
-       
-        const handle_ADD = (operandA, operandB) => {
-            this.alu('ADD', operandA, operandB);
-        }
-
-        const handle_PUSH = (opA) => {
-            // console.log('>>>>>>>>>>>>>>>>>', opA)
-            this.reg[SP] = this.reg[SP] - 1;
-            this.ram.write(this.reg[SP], this.reg[opA]);
-        }
-        
-        const handle_POP = (opA) => {
-            this.reg[opA] = this.ram.read(this.reg[SP]);
-            this.reg[SP]++;
-        }
-
-        const handle_CALL = (opA) => {
-            // handle_PUSH(this.reg.PC + 2);
-            this.reg[SP] = this.reg[SP] - 1;
-            this.ram.write(this.reg[SP], this.reg.PC + 2);
-            return this.reg[opA];
-        }
-        
-        const handle_RET = () => {
-            const value = this.ram.read(this.reg[SP]);
-            this.reg[SP]++;
-            return value;
-        }
-
-        const branchTable = {
-            [LDI] : handle_LDI,
-            [HLT] : handle_HLT,
-            [PRN] : handle_PRN,
-            [MUL] : handle_MUL,
-            [ADD] : handle_ADD,
-            [PUSH] : handle_PUSH,
-            [POP] : handle_POP,
-            [CALL] : handle_CALL,
-            [RET] : handle_RET,
-        }
-
-        const handlerReturn = branchTable[IR](operandA, operandB);
+        const handlerReturn = this.branchTable[IR](this, operandA, operandB);
 
         // Increment the PC register to go to the next instruction. Instructions
         // can be 1, 2, or 3 bytes long. Hint: the high 2 bits of the
@@ -194,6 +133,50 @@ class CPU {
             this.reg.PC = handlerReturn;
         }
 
+    }
+
+    handle_LDI (cpu, operandA, operandB) {
+        cpu.reg[operandA] = operandB;
+    }
+
+    handle_PRN (cpu, operandA) {
+        console.log(cpu.reg[operandA]);
+    }
+
+    handle_HLT (cpu) {
+        cpu.stopClock();
+    }
+
+    handle_MUL (cpu, operandA, operandB) {
+        cpu.alu('MUL', operandA, operandB);
+    }
+   
+    handle_ADD (cpu, operandA, operandB) {
+        cpu.alu('ADD', operandA, operandB);
+    }
+
+    handle_PUSH (cpu, opA) {
+        // console.log('>>>>>>>>>>>>>>>>>', opA)
+        cpu.reg[SP] = cpu.reg[SP] - 1;
+        cpu.ram.write(cpu.reg[SP], cpu.reg[opA]);
+    }
+    
+    handle_POP (cpu, opA) {
+        cpu.reg[opA] = cpu.ram.read(cpu.reg[SP]);
+        cpu.reg[SP]++;
+    }
+
+    handle_CALL (cpu, opA) {
+        // handle_PUSH(cpu.reg.PC + 2);
+        cpu.reg[SP] = cpu.reg[SP] - 1;
+        cpu.ram.write(cpu.reg[SP], cpu.reg.PC + 2);
+        return cpu.reg[opA];
+    }
+    
+    handle_RET (cpu) {
+        const value = cpu.ram.read(cpu.reg[SP]);
+        cpu.reg[SP]++;
+        return value;
     }
 
 }
