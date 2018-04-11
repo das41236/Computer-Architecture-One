@@ -10,8 +10,8 @@ const LDI = 0b10011001;
 const PRN = 0b01000011;
 const HLT = 0b00000001;
 const MUL = 0b10101010;
-
-
+const PUSH = 0b01001101;
+const POP = 0b01001100;
 
 class CPU {
 
@@ -114,6 +114,8 @@ class CPU {
         //         console.log('none of those cases, so we stopped anyways')
         //         this.stopClock();
         // }
+
+        let SP = 0x07;
         
         const handle_LDI = (operandA, operandB) => {
             this.reg[operandA] = operandB;
@@ -130,13 +132,24 @@ class CPU {
         const handle_MUL = (operandA, operandB) => {
             this.alu('MUL', operandA, operandB);
         }
+
+        const handle_PUSH = (opA) => {
+            this.reg[SP] = this.reg[SP] - 1;
+            this.ram.write(this.reg[SP], this.reg[opA]);
+        }
+        
+        const handle_POP = (opA) => {
+            this.reg[opA] = this.ram.read(this.reg[SP]);
+            this.reg[SP]++;
+        }
         
         const branchTable = {
             [LDI] : handle_LDI,
             [HLT] : handle_HLT,
             [PRN] : handle_PRN,
-            [MUL] : handle_MUL
-
+            [MUL] : handle_MUL,
+            [PUSH] : handle_PUSH,
+            [POP] : handle_POP
         }
 
         branchTable[IR](operandA, operandB);
